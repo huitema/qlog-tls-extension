@@ -19,29 +19,27 @@
 # Change the file extension to match the format (.xml for XML, etc...)
 #
 ###
-title: "TODO - Your title"
-abbrev: "TODO - Abbreviation"
+title: "QLOG extension for TLS events"
+abbrev: "qlog-tls"
 category: info
 
-docname: draft-todo-yourname-protocol-latest
+docname: draft-huitema-quic-qlog-tls-latest
 submissiontype: IETF  # also: "independent", "editorial", "IAB", or "IRTF"
 number:
 date:
 consensus: true
 v: 3
-area: AREA
-workgroup: WG Working Group
+area: transport
+workgroup: QUIC Working Group
 keyword:
- - next generation
- - unicorn
- - AI-native
+ - QUIC
+ - TLS
+ - QLOG
 venue:
   group: WG
   type: Working Group
-  mail: WG@example.com
-  arch: https://example.com/WG
-  github: USER/REPO
-  latest: https://example.com/LATEST
+  mail: quic@ietf.com
+  github: huitema/qlog-tls-extension
 
 author:
  -
