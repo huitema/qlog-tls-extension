@@ -9,17 +9,17 @@ number:
 date:
 consensus: true
 v: 3
-area: transport
-workgroup: QUIC Working Group
+area: "Web and Internet Transport"
+workgroup: "QUIC"
 keyword:
  - QUIC
  - TLS
  - QLOG
 venue:
-  group: WG
-  type: Working Group
-  mail: quic@ietf.com
-  github: huitema/qlog-tls-extension
+  group: "QUIC"
+  type: "Working Group"
+  mail: "quic@ietf.org"
+  github: "huitema/qlog-tls-extension"
 
 author:
  -
