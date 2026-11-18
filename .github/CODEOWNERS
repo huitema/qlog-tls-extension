@@ -1,0 +1,3 @@
+# Automatically generated CODEOWNERS
+# Regenerate with `make update-codeowners`
+draft-huitema-quic-qlog-tls.md huitema@huitema.net
