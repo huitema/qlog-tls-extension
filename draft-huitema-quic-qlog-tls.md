@@ -112,7 +112,9 @@ example, draft 00 of this document is identified using the URI
 urn:ietf:params:qlog:events:tls-00.
 
 
-* TLS Data Type Definitions {#data-types}
+# TLS Data Type Definitions {#data-types}
+
+TODO
 
 # Security Considerations {#security}
 
