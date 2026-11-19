@@ -54,7 +54,7 @@ This document defines a qlog event schema (Section 8 of
 {{I-D.ietf-quic-qlog-main-schema}})
 containing concrete events for the TLS events impacting
 QUIC connections {{RFC9000}}. QUIC use TLS 1.3 ({{RFC9846}}) as defined in {{RFC9001}}.
-In addition to session establishment and key negotiation, QUIC connections 
+In addition to session establishment and key negotiation, QUIC connections
 use elements like Service Name Identification (SNI) or Application
 Layer Protocol Name (ALPN) that are obtained through the TLS exchange.
 
