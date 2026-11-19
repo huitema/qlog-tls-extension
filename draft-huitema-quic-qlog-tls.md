@@ -104,9 +104,9 @@ this specification.
 {: #tls-events title="TLS Events"}
 
 QUIC events extend the `$ProtocolEventData` extension point defined in
-{{Section 8.2 of QLOG-MAIN}}. Additionally, they allow for direct extensibility by their use of
+{{Section 8.2 of I-D.ietf-quic-qlog-main-schema}}. Additionally, they allow for direct extensibility by their use of
 per-event extension points via the `$$` CDDL "group socket" syntax, as also
-described in {{Section 8.2 of QLOG-MAIN}}.
+described in {{Section 8.2 of I-D.ietf-quic-qlog-main-schema}}.
 
 ~~~ cddl
 TTLSEventData = TLSALPNInformation
