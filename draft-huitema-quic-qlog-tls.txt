@@ -2,10 +2,10 @@
 
 
 
-QUIC Working Group                                            Y. N. Here
-Internet-Draft                                    Your Organization Here
-Intended status: Informational                          18 November 2026
-Expires: 22 May 2027
+QUIC                                                          C. Huitema
+Internet-Draft                                      Private Octopus Inc.
+Intended status: Informational                          19 November 2026
+Expires: 23 May 2027
 
 
                      QLOG extension for TLS events
@@ -13,7 +13,10 @@ Expires: 22 May 2027
 
 Abstract
 
-   TODO Abstract
+   When logging QUIC connections using QLOG, we want to capture TLS
+   events that help understand the behavior of the connection, such as
+   for example SNI selection or ALPN negotiation.  This draft lists the
+   relevant events and proposes logging extensions.
 
 About This Document
 
@@ -22,8 +25,10 @@ About This Document
    Status information for this document may be found at
    https://datatracker.ietf.org/doc/draft-huitema-quic-qlog-tls/.
 
-   Discussion of this document takes place on the WG Working Group
-   mailing list (mailto:quic@ietf.com).
+   Discussion of this document takes place on the QUIC Working Group
+   mailing list (mailto:quic@ietf.org), which is archived at
+   https://mailarchive.ietf.org/arch/browse/quic/.  Subscribe at
+   https://www.ietf.org/mailman/listinfo/quic/.
 
    Source for this draft and an issue tracker can be found at
    https://github.com/huitema/qlog-tls-extension.
@@ -43,7 +48,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 22 May 2027.
+   This Internet-Draft will expire on 23 May 2027.
 
 Copyright Notice
 
@@ -63,15 +68,30 @@ Table of Contents
 
    1.  Introduction
    2.  Conventions and Definitions
-   3.  Security Considerations
-   4.  IANA Considerations
-   5.  Normative References
+   3.  Event Schema Definition
+     3.1.  Draft Event Schema Identification
+   4.  TLS Data Type Definitions
+   5.  Security Considerations
+   6.  IANA Considerations
+   7.  Normative References
    Acknowledgments
    Author's Address
 
 1.  Introduction
 
-   TODO Introduction
+   This document defines a qlog event schema (Section 8 of
+   [I-D.ietf-quic-qlog-main-schema]) containing concrete events for the
+   TLS events impacting QUIC connections [RFC9000].  QUIC use TLS 1.3
+   ([RFC9846]) as defined in [RFC9001].  In addition to session
+   establishment and key negotiation, QUIC connections use elements like
+   Service Name Identification (SNI) or Application Layer Protocol Name
+   (ALPN) that are obtained through the TLS exchange.
+
+   The event namespace with identifier tls is defined; see Section 3.
+   In this namespace multiple events derive from the qlog abstract Event
+   class (Section 7 of [I-D.ietf-quic-qlog-main-schema]), each extending
+   the data field and defining their name field values and semantics.
+   The data types that the events use are defined in Section 4
 
 2.  Conventions and Definitions
 
@@ -81,15 +101,58 @@ Table of Contents
    BCP 14 [RFC2119] [RFC8174] when, and only when, they appear in all
    capitals, as shown here.
 
-3.  Security Considerations
+3.  Event Schema Definition
+
+   This document describes how the core TLS protocol and selected
+   extensions can be expressed in qlog using a newly defined event
+   schema.  Per the requirements in (Section 8 of
+   [I-D.ietf-quic-qlog-main-schema]), this document registers the tls
+   namespace.  The event schema URI is urn:ietf:params:qlog:events:tls.
+
+3.1.  Draft Event Schema Identification
+
+   This section is to be removed before publishing as an RFC.
+
+   Only implementations of the final, published RFC can use the events
+   belonging to the event schema with the URI
+   urn:ietf:params:qlog:events:tls.  Until such an RFC exists,
+   implementations MUST NOT identify themselves using this URI.
+
+   Implementations of draft versions of the event schema MUST append the
+   string "-" and the corresponding draft number to the URI.  For
+   example, draft 00 of this document is identified using the URI
+   urn:ietf:params:qlog:events:tls-00.
+
+4.  TLS Data Type Definitions
+
+   TODO
+
+5.  Security Considerations
 
    TODO Security
 
-4.  IANA Considerations
+6.  IANA Considerations
 
-   This document has no IANA actions.
+   This document registers a new entry in the "qlog event schema URIs"
+   registry, which was created in Section 15 of
+   [I-D.ietf-quic-qlog-main-schema]):
 
-5.  Normative References
+   Event schema URI: urn:ietf:params:qlog:events:tls
+
+   Event-types: TODO.  List the new events that are created here.
+
+   Description: Event definitions related to the use of TLS 1.3
+   ([RFC9846]) as defined in [RFC9001].
+
+7.  Normative References
+
+   [I-D.ietf-quic-qlog-main-schema]
+              Marx, R., Niccolini, L., Seemann, M., and L. Pardue,
+              "qlog: Structured Logging for Network Protocols", Work in
+              Progress, Internet-Draft, draft-ietf-quic-qlog-main-
+              schema-15, 2 November 2026,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-quic-
+              qlog-main-schema-15>.
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
@@ -100,12 +163,25 @@ Table of Contents
               2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
               May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
 
+   [RFC9000]  Iyengar, J., Ed. and M. Thomson, Ed., "QUIC: A UDP-Based
+              Multiplexed and Secure Transport", RFC 9000,
+              DOI 10.17487/RFC9000, May 2021,
+              <https://www.rfc-editor.org/rfc/rfc9000>.
+
+   [RFC9001]  Thomson, M., Ed. and S. Turner, Ed., "Using TLS to Secure
+              QUIC", RFC 9001, DOI 10.17487/RFC9001, May 2021,
+              <https://www.rfc-editor.org/rfc/rfc9001>.
+
+   [RFC9846]  Rescorla, E., "The Transport Layer Security (TLS) Protocol
+              Version 1.3", RFC 9846, DOI 10.17487/RFC9846, July 2026,
+              <https://www.rfc-editor.org/rfc/rfc9846>.
+
 Acknowledgments
 
    TODO acknowledge.
 
 Author's Address
 
-   Your Name Here
-   Your Organization Here
-   Email: your.email@example.com
+   Christian Huitema
+   Private Octopus Inc.
+   Email: huitema@huitema.net
