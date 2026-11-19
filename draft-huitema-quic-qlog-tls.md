@@ -166,7 +166,7 @@ A server logs this event once, after it chooses, with `client_alpns`,
 
 # TLS Data Type Definitions {#data-types}
 
-TODO
+TODO.
 
 # Security Considerations {#security}
 
