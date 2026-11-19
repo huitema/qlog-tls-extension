@@ -1,24 +1,4 @@
 ---
-###
-# Internet-Draft Markdown Template
-#
-# Rename this file from draft-todo-yourname-protocol.md to get started.
-# Draft name format is "draft-<yourname>-<workgroup>-<name>.md".
-#
-# For initial setup, you only need to edit the first block of fields.
-# Only "title" needs to be changed; delete "abbrev" if your title is short.
-# Any other content can be edited, but be careful not to introduce errors.
-# Some fields will be set automatically during setup if they are unchanged.
-#
-# Don't include "-00" or "-latest" in the filename.
-# Labels in the form draft-<yourname>-<workgroup>-<name>-latest are used by
-# the tools to refer to the current version; see "docname" for example.
-#
-# This template uses kramdown-rfc: https://github.com/cabo/kramdown-rfc
-# You can replace the entire file if you prefer a different format.
-# Change the file extension to match the format (.xml for XML, etc...)
-#
-###
 title: "QLOG extension for TLS events"
 abbrev: "qlog-tls"
 category: info
@@ -29,17 +9,17 @@ number:
 date:
 consensus: true
 v: 3
-area: transport
-workgroup: QUIC Working Group
+area: "Web and Internet Transport"
+workgroup: "QUIC"
 keyword:
  - QUIC
  - TLS
  - QLOG
 venue:
-  group: WG
-  type: Working Group
-  mail: quic@ietf.com
-  github: huitema/qlog-tls-extension
+  group: "QUIC"
+  type: "Working Group"
+  mail: "quic@ietf.org"
+  github: "huitema/qlog-tls-extension"
 
 author:
  -
@@ -74,7 +54,7 @@ This document defines a qlog event schema (Section 8 of
 {{I-D.ietf-quic-qlog-main-schema}})
 containing concrete events for the TLS events impacting
 QUIC connections {{RFC9000}}. QUIC use TLS 1.3 ({{RFC9846}}) as defined in {{RFC9001}}.
-In addition to session establishment and key negotiation, QUIC connections 
+In addition to session establishment and key negotiation, QUIC connections
 use elements like Service Name Identification (SNI) or Application
 Layer Protocol Name (ALPN) that are obtained through the TLS exchange.
 
