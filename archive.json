@@ -1,0 +1,183 @@
+{
+  "magic": "E!vIA5L86J2I",
+  "timestamp": "2026-11-22T00:27:53.574712+00:00",
+  "repo": "huitema/qlog-tls-extension",
+  "labels": [
+    {
+      "name": "accessibility",
+      "description": "Barrier affecting people with disabilities",
+      "color": "f143ab"
+    },
+    {
+      "name": "bug",
+      "description": "Something isn't working",
+      "color": "d73a4a"
+    },
+    {
+      "name": "documentation",
+      "description": "Improvements or additions to documentation",
+      "color": "0075ca"
+    },
+    {
+      "name": "duplicate",
+      "description": "This issue or pull request already exists",
+      "color": "cfd3d7"
+    },
+    {
+      "name": "enhancement",
+      "description": "New feature or request",
+      "color": "a2eeef"
+    },
+    {
+      "name": "good first issue",
+      "description": "Good for newcomers",
+      "color": "7057ff"
+    },
+    {
+      "name": "help wanted",
+      "description": "Extra attention is needed",
+      "color": "008672"
+    },
+    {
+      "name": "invalid",
+      "description": "This doesn't seem right",
+      "color": "e4e669"
+    },
+    {
+      "name": "question",
+      "description": "Further information is requested",
+      "color": "d876e3"
+    },
+    {
+      "name": "wontfix",
+      "description": "This will not be worked on",
+      "color": "ffffff"
+    }
+  ],
+  "issues": [
+    {
+      "number": 1,
+      "id": "I_kwDOVzih588AAAABgj4-Qg",
+      "title": "Define the scope and the list of target events",
+      "url": "https://github.com/huitema/qlog-tls-extension/issues/1",
+      "state": "OPEN",
+      "author": "huitema",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "The first requirement for this TLS draft is to define the scope. My preference would be to look at the TLS API used by QUIC, and list the events that we want to log. we know about 2 of them, SNI selection and ALPN selection, but there are probably more. Things like sucess/failure, HRR, 0RTT negotiated or not, ECH.\n\nAlso, probably, some logging of the TLS tickets.",
+      "createdAt": "2026-11-19T01:08:12Z",
+      "updatedAt": "2026-11-21T06:39:40Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "huitema",
+          "authorAssociation": "OWNER",
+          "body": "From various discussions:\n\n* ALPN information: there is consensus to move the definition from the QUIC to the TLS name space.\n\n* SNI: there is consensus that we should log it.\n\n* from [qlog issue 121](https://github.com/quicwg/qlog/issues/121):  log the QUIC-accessible part of the session resume ticket.\n\n* from picoquic experience: log whether a session ticket is available, whether the connection was resumed, whether 0-RTT was supported. This is also mentioned in [qlog issue 27](https://github.com/quicwg/qlog/issues/27)\n\n* log whether a session establishment failed, and try to log the reason.\n\n* consider logging whether ECH was tried, and then whether it was negotiated\n\n",
+          "createdAt": "2026-11-19T07:32:17Z",
+          "updatedAt": "2026-11-19T07:32:17Z"
+        },
+        {
+          "author": "toidiu",
+          "authorAssociation": "COLLABORATOR",
+          "body": "This is a great list. \n\nA few things we were speaking about offline.Nothing set in stone and @huitema please feel free to correct me.\n- We will only support TLS 1.3\n- We need to support events emitted from both H3 and H2 connections\n- @huitema you mentioned in slack that we should limit the events to \"TLS 1.3 at the granularity of what is visible by the app\". Can you expand on this. Its nice to have detailed info about the TLS handshake for debugging purposes and metrics but these would not necessarily be available to the app. \n\nSome other fields that came to mind:\n- tls params that were chosen for the connection\n  - cipher suites\n  - key exchange group\n  - meta info about the cert? (for example to debug if PQ schemes were negotiated)\n- mTLS\n- session resumption and 0-rtt (its nice to have [reason](https://commondatastorage.googleapis.com/chromium-boringssl-docs/ssl.h.html#ssl_early_data_reason_t) why the session was not resumed but we should be impl agnostic)",
+          "createdAt": "2026-11-21T04:36:46Z",
+          "updatedAt": "2026-11-21T04:37:58Z"
+        },
+        {
+          "author": "huitema",
+          "authorAssociation": "OWNER",
+          "body": "We do qlog to get a structured log of a networking application. We might for example log an H3 application, and for that we can use qlog specs for H3 and QUIC. That's practical because the H3 and QUIC are usually developed as part of related software libraries. Those libraries have to interface with TLS 1.3 to get keys, check certs, etc. That means we have good chance of logging the \"interface\" interactions between the H3 or QUIC and TLS 1.3. But the application does not usually have access to the internals of the TLS implementation -- that's done inside OpenSSL or other libraries, and I don't think we can realistically ask these libraries to do qlog.",
+          "createdAt": "2026-11-21T06:34:50Z",
+          "updatedAt": "2026-11-21T06:34:50Z"
+        },
+        {
+          "author": "huitema",
+          "authorAssociation": "OWNER",
+          "body": "\"session resumption and 0-rtt (its nice to have [reason](https://commondatastorage.googleapis.com/chromium-boringssl-docs/ssl.h.html#ssl_early_data_reason_t) why the session was not resumed but we should be impl agnostic)\": the way we do that is we define an event with mandatory elements such as accepted/refused, resumed or not, 0RTT or not; and we also define optional elements that provide more information if available. \n\nSee for example the definition of a token (QUIC level) in the QUIC qlog events draft:\n```\nToken = {\n    ? type: $TokenType\n\n    ; decoded fields included in the token\n    ; (typically: peer's IP address, creation time)\n    ? details: {\n      * text => any\n    }\n    ? raw: RawInfo\n\n    * $$quic-token-extension\n}\n\n$TokenType /= \"retry\" /\n              \"resumption\"\n```\n",
+          "createdAt": "2026-11-21T06:39:39Z",
+          "updatedAt": "2026-11-21T06:39:39Z"
+        }
+      ]
+    }
+  ],
+  "pulls": [
+    {
+      "number": 2,
+      "id": "PR_kwDOVzih588AAAABQTV_MQ",
+      "title": "Registration of name space and URI",
+      "url": "https://github.com/huitema/qlog-tls-extension/pull/2",
+      "state": "MERGED",
+      "author": "huitema",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2026-11-19T04:46:37Z",
+      "updatedAt": "2026-11-19T04:54:53Z",
+      "baseRepository": "huitema/qlog-tls-extension",
+      "baseRefName": "main",
+      "baseRefOid": "4e52bf9ee7fbfe2db43742793d9963ed95ecad31",
+      "headRepository": "huitema/qlog-tls-extension",
+      "headRefName": "first-draft",
+      "headRefOid": "5e2f8f3367f9c3849837710487362766a39c0a9c",
+      "closedAt": "2026-11-19T04:54:53Z",
+      "mergedAt": "2026-11-19T04:54:53Z",
+      "mergedBy": "huitema",
+      "mergeCommit": {
+        "oid": "9cccfa40aa9e5fa383b4e001497fe0aa5391fb24"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOVzih588AAAABY87m_g",
+          "commit": {
+            "abbreviatedOid": "7debf62"
+          },
+          "author": "github-actions",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-11-19T04:47:58Z",
+          "updatedAt": "2026-11-19T04:47:59Z",
+          "comments": [
+            {
+              "originalPosition": 41,
+              "body": "````suggestion\nIn addition to session establishment and key negotiation, QUIC connections\n````",
+              "createdAt": "2026-11-19T04:47:58Z",
+              "updatedAt": "2026-11-19T04:47:59Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "id": "PR_kwDOVzih588AAAABQTpXRQ",
+      "title": "First draft",
+      "url": "https://github.com/huitema/qlog-tls-extension/pull/3",
+      "state": "MERGED",
+      "author": "huitema",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "Move ALPN information event from quic schema to tls",
+      "createdAt": "2026-11-19T05:20:14Z",
+      "updatedAt": "2026-11-19T05:24:00Z",
+      "baseRepository": "huitema/qlog-tls-extension",
+      "baseRefName": "main",
+      "baseRefOid": "9cccfa40aa9e5fa383b4e001497fe0aa5391fb24",
+      "headRepository": "huitema/qlog-tls-extension",
+      "headRefName": "first-draft",
+      "headRefOid": "c00f16357f0896b67ea2ef265a646df15e526edd",
+      "closedAt": "2026-11-19T05:23:59Z",
+      "mergedAt": "2026-11-19T05:23:59Z",
+      "mergedBy": "huitema",
+      "mergeCommit": {
+        "oid": "288b9b8a207af4184bb1dcd375949282bbd58f51"
+      },
+      "comments": [],
+      "reviews": []
+    }
+  ]
+}
