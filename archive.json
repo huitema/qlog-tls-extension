@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-11-22T00:27:53.574712+00:00",
+  "timestamp": "2026-11-26T00:25:23.758852+00:00",
   "repo": "huitema/qlog-tls-extension",
   "labels": [
     {
@@ -67,7 +67,7 @@
       "labels": [],
       "body": "The first requirement for this TLS draft is to define the scope. My preference would be to look at the TLS API used by QUIC, and list the events that we want to log. we know about 2 of them, SNI selection and ALPN selection, but there are probably more. Things like sucess/failure, HRR, 0RTT negotiated or not, ECH.\n\nAlso, probably, some logging of the TLS tickets.",
       "createdAt": "2026-11-19T01:08:12Z",
-      "updatedAt": "2026-11-21T06:39:40Z",
+      "updatedAt": "2026-11-25T01:57:40Z",
       "closedAt": null,
       "comments": [
         {
@@ -97,6 +97,20 @@
           "body": "\"session resumption and 0-rtt (its nice to have [reason](https://commondatastorage.googleapis.com/chromium-boringssl-docs/ssl.h.html#ssl_early_data_reason_t) why the session was not resumed but we should be impl agnostic)\": the way we do that is we define an event with mandatory elements such as accepted/refused, resumed or not, 0RTT or not; and we also define optional elements that provide more information if available. \n\nSee for example the definition of a token (QUIC level) in the QUIC qlog events draft:\n```\nToken = {\n    ? type: $TokenType\n\n    ; decoded fields included in the token\n    ; (typically: peer's IP address, creation time)\n    ? details: {\n      * text => any\n    }\n    ? raw: RawInfo\n\n    * $$quic-token-extension\n}\n\n$TokenType /= \"retry\" /\n              \"resumption\"\n```\n",
           "createdAt": "2026-11-21T06:39:39Z",
           "updatedAt": "2026-11-21T06:39:39Z"
+        },
+        {
+          "author": "huitema",
+          "authorAssociation": "OWNER",
+          "body": "This is an extract of the console output of a picoquic connection, complemented by information logged at the server. I removed the report lines that relate to QUIC and H3:\n\nFirst lines indicate that the client will use a session resume ticket, set the ALPN and QUIC version to the values associated with that ticket:\n~~~\nStarting Picoquic (v1.1.54.0) connection to server = test.privateoctopus.com, port = 4433\nSet ALPN to h3 based on stored ticket\nSet version to 0x00000001 based on stored ticket\n~~~\n\nThis could be extended into a \"TLSSessionStart\" at client. Maybe a similar log on the server side. The server side qlog display some data as information message:\n~~~\n[174, 0, \"transport\", \"parameters_set\", {\n    \"owner\": \"remote\",\n    \"sni\": \"test.privateoctopus.com\",\n    \"proposed_alpn\": [\"h3\"],\n    \"alpn\": \"h3\"}],\n[193, 0, \"info\", \"message\", { \"message\": \"Session ticket properly decrypted\"}],\n~~~\nThis kind of info could be added to an event, \"TLSSessionRequested\" (by a client), although we may also want to document ALPN negotiation in its own event. We could discuss whether the client and server side of these events should be a single event with parameters, or two events.\n\nWe can track the progress of the session by looking at the qlog, showing \"initial\" and \"handshake\" packets, and the carrying of TLS data in \"crypto\" frames. If you have good eyes, you can see that one of the \"handshake\" packets received from the client carries a \"crypto\" frame:\n~~~\n[118794, 0, \"transport\", \"packet_received\", { \"packet_type\": \"handshake\", \"header\": { \"packet_size\": 93, \"packet_number\": 0, \"payload_length\": 48, \"scid\": \"9274864ce2165713\", \"dcid\": \"c9dcb5a670f871bc\" }, \"frames\": [{ \n    \"frame_type\": \"ack\", \"ack_delay\": 99, \"acked_ranges\": [[0, 1]], \"ect0\": 2, \"ect1\": 0, \"ce\": 0}, { \n    \"frame_type\": \"crypto\", \"offset\": 0, \"length\": 36}]}],\n~~~\nThis contains the \"client finished\" message. Might be good to log that in an event, \"TLSSessionComplete\". We may want to add additional negotiation, such as the negotiated Crypto suite.\n\nOn the client UI, results of connection show that in that case the session was accepted, the resumption was successful, zero RTT data was supported.\n~~~\nThe session was properly resumed!\nZero RTT data is accepted!\nNegotiated ALPN: h3\n~~~\nAgain, this look like information that could fit in a \"TLSSessionComplete\". event. Note that in the picoquic case the transport code does not see the certificate, it is all handled inside the TLS stack.\n\nThe session executes. At the end, the UI prints some statistics, and details about the session resume ticket that was received. we do not show here the 137 bytes of the actual ticket, only the information that is available to the client:\n~~~\nReceived ticket from test.privateoctopus.com (h3):\nticket time = 1795564417938, kx = 1d, suite = 1301, 137 ticket, 32 secret.\nlifetime = 100000, age_add = a71e4232, 0 nonce, 116 ticket, 8 extensions.\nticket extensions: 42(ED: ffffffff),\nClient exit with code = 0\n~~~\nThis would map neastly to a TLSResumeTicketReceived event.",
+          "createdAt": "2026-11-25T00:33:40Z",
+          "updatedAt": "2026-11-25T00:33:40Z"
+        },
+        {
+          "author": "huitema",
+          "authorAssociation": "OWNER",
+          "body": "Purposely starting a connection with the wrong ALPN.\n\nOn the server's qlog, we see the incoming request:\n~~~\n[182, 0, \"transport\", \"parameters_set\", {\n    \"owner\": \"remote\",\n    \"sni\": \"test.privateoctopus.com\",\n    \"proposed_alpn\": [\"bad_alpn\"]}],\n~~~\n\nWe also see that the alpn is wrong, but don't have a structured error message for that. Instead, we have informal traces:\n~~~\n[184, 0, \"info\", \"message\", { \"message\": \"Client Hello call back returns 120 (0x78)\"}],\n[186, 0, \"info\", \"message\", { \"message\": \"Picotls returns error: 120 (0x78)\"}],\n[187, 0, \"info\", \"message\", { \"message\": \"Protocol error 0x178, frame 0, reason: ?\"}],\n~~~\n\nQUIC Error 0x178 is TLS alert 120 (0x78): no_application_protocol. We may want to log TLS alerts in either a \"TLSSessionRefused\" event or a TLSAlert event.\n\nThe client UI similarly says:\n~~~\nThe connection is closed!\nConnection ends with remote error 0x178 (wrong alpn).\n~~~\n\nBut then, the connection error is also logged at the QUIC level, and it could log the TLS error code explicitly.\n",
+          "createdAt": "2026-11-25T01:57:40Z",
+          "updatedAt": "2026-11-25T01:57:40Z"
         }
       ]
     }
